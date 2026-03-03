@@ -5,6 +5,9 @@ import Profile from './pages/Profile'
 import Discover from './pages/Discover'
 import Feed from './pages/Feed'
 import Gigs from './pages/Gigs'
+import Messages from './pages/Messages'
+import Notifications from './pages/Notifications'
+import EditProfile from './pages/EditProfile'
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         <Route path="/discover" element={<Discover />} />
         <Route path="/feed" element={<Feed />} />
         <Route path="/gigs" element={<Gigs />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
     </BrowserRouter>
   )
