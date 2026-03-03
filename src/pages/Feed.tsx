@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heart, MessageCircle, Bookmark, Share2, MapPin, Plus, X, Image, Send } from 'lucide-react'
+import { Heart, MessageCircle, Bookmark, Share2, MapPin, Plus, X, Image, Send, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import Navbar from '../components/Navbar'
@@ -37,7 +37,11 @@ type Comment = {
   }
 }
 
-function PostCard({ post, currentUserId }: { post: Post; currentUserId: string | null }) {
+function PostCard({ post, currentUserId, onDelete }: { 
+  post: Post
+  currentUserId: string | null
+  onDelete: (id: string) => void 
+}) {
   const [liked, setLiked] = useState(false)
   const [saved, setSaved] = useState(false)
   const [likes, setLikes] = useState(post.likes_count)
@@ -148,21 +152,35 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string |
     <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
 
       {/* Post header */}
-      <div className="flex items-center gap-3 p-4">
-        <img
-          src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.user_id}`}
-          alt={post.profiles?.name}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex-1">
-          <p className="font-semibold text-sm">{post.profiles?.name}</p>
-          <p className="text-xs text-orange-400">{post.profiles?.category}</p>
-        </div>
-        <span className="text-xs text-white/30 flex items-center gap-1">
-          <MapPin size={10} /> {post.profiles?.location} · {timeAgo(post.created_at)}
-        </span>
-      </div>
-
+      {/* Post header */}
+<div className="flex items-center gap-3 p-4">
+  <img
+    src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.user_id}`}
+    alt={post.profiles?.name}
+    className="w-10 h-10 rounded-full object-cover"
+  />
+  <div className="flex-1">
+    <p className="font-semibold text-sm">{post.profiles?.name}</p>
+    <p className="text-xs text-orange-400">{post.profiles?.category}</p>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="text-xs text-white/30 flex items-center gap-1">
+      <MapPin size={10} /> {post.profiles?.location} · {timeAgo(post.created_at)}
+    </span>
+    {currentUserId === post.user_id && (
+      <button
+        onClick={async () => {
+          if (!confirm('Delete this post?')) return
+          await supabase.from('posts').delete().eq('id', post.id)
+          onDelete(post.id)
+        }}
+        className="text-white/20 hover:text-red-400 transition ml-2"
+      >
+        <Trash2 size={15} />
+      </button>
+    )}
+  </div>
+</div>
       {/* Image */}
       {post.image_url && (
         <img src={post.image_url} alt="post" className="w-full aspect-square object-cover" />
@@ -407,8 +425,13 @@ export default function Feed() {
             </div>
           )}
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUserId={user?.id ?? null} />
-          ))}
+  <PostCard
+    key={post.id}
+    post={post}
+    currentUserId={user?.id ?? null}
+    onDelete={(id) => setPosts(posts.filter((p) => p.id !== id))}
+  />
+))}
         </div>
 
         {/* Sidebar */}

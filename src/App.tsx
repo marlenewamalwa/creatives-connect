@@ -8,6 +8,7 @@ import Gigs from './pages/Gigs'
 import Messages from './pages/Messages'
 import Notifications from './pages/Notifications'
 import EditProfile from './pages/EditProfile'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -15,13 +16,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/profile/:username" element={<Profile />} />
         <Route path="/discover" element={<Discover />} />
-        <Route path="/feed" element={<Feed />} />
-        <Route path="/gigs" element={<Gigs />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+        <Route path="/gigs" element={<ProtectedRoute><Gigs /></ProtectedRoute>} />
+        <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )
