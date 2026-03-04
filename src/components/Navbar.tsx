@@ -17,13 +17,23 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
 
   useEffect(() => {
     if (!user) return
+
     supabase
       .from('profiles')
       .select('username, avatar_url, name')
       .eq('id', user.id)
       .single()
-      .then(({ data }) => setProfile(data))
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error fetching profile:', error.message)
+          return
+        }
+        setProfile(data)
+      })
   }, [user])
+
+  const profileHref =
+    profile?.username ? `/profile/${profile.username}` : '/complete-profile'
 
   return (
     <>
@@ -34,7 +44,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
           creatives<span className="text-orange-400">connect</span>
         </a>
 
-        {/* Desktop nav icons — logged in */}
+        {/* Desktop nav icons */}
         {user && (
           <div className="hidden md:flex items-center gap-6 text-white/40">
             <a href="/feed" className="hover:text-white transition"><Home size={20} /></a>
@@ -60,6 +70,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
                   <Plus size={16} /> Post
                 </button>
               )}
+
               <div className="relative">
                 {profile?.avatar_url ? (
                   <img
@@ -79,19 +90,32 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
 
                 {dropdownOpen && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setDropdownOpen(false)}
+                    />
+
                     <div className="absolute right-0 top-10 bg-[#111] border border-white/10 rounded-xl p-2 w-44 z-20">
-                      <a href={`/profile/${profile?.username ?? ''}`} onClick={() => setDropdownOpen(false)}>
-                        <button className="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition">
-                          My Profile
-                        </button>
+
+                      {/* ✅ Fixed missing <a> */}
+                      <a
+                        href={profileHref}
+                        onClick={() => setDropdownOpen(false)}
+                        className="block w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition"
+                      >
+                        My Profile
                       </a>
-                      <a href="/edit-profile" onClick={() => setDropdownOpen(false)}>
-                        <button className="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition">
-                          Edit Profile
-                        </button>
+
+                      <a
+                        href="/edit-profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="block w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition"
+                      >
+                        Edit Profile
                       </a>
+
                       <div className="border-t border-white/10 my-1" />
+
                       <button
                         onClick={async () => {
                           await supabase.auth.signOut()
@@ -108,13 +132,19 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
             </>
           ) : (
             <>
-              <a href="/auth">
-                <button className="text-sm text-white/60 hover:text-white transition">Log in</button>
+              {/* ✅ Removed button inside anchor */}
+              <a
+                href="/auth"
+                className="text-sm text-white/60 hover:text-white transition"
+              >
+                Log in
               </a>
-              <a href="/auth">
-                <button className="text-sm bg-orange-400 hover:bg-orange-500 text-black font-semibold px-4 py-2 rounded-full transition">
-                  Join now
-                </button>
+
+              <a
+                href="/auth"
+                className="text-sm bg-orange-400 hover:bg-orange-500 text-black font-semibold px-4 py-2 rounded-full transition"
+              >
+                Join now
               </a>
             </>
           )}
@@ -130,6 +160,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
               <Plus size={14} /> Post
             </button>
           )}
+
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-white/60 hover:text-white transition"
@@ -165,7 +196,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
                   { href: '/gigs', icon: <Briefcase size={20} />, label: 'Gigs' },
                   { href: '/messages', icon: <MessageCircle size={20} />, label: 'Messages' },
                   { href: '/notifications', icon: <Bell size={20} />, label: 'Notifications' },
-                  { href: `/profile/${profile?.username}`, icon: null, label: 'My Profile' },
+                  { href: profileHref, icon: null, label: 'My Profile' }, // ✅ safe route
                   { href: '/edit-profile', icon: null, label: 'Edit Profile' },
                 ].map((item) => (
                   <a
@@ -194,28 +225,37 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
             </>
           ) : (
             <div className="flex flex-col items-center gap-6 mt-16">
-              {[
-                { href: '/discover', label: 'Discover' },
-                { href: '/gigs', label: 'Gigs' },
-              ].map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-2xl text-white/60 hover:text-white transition"
-                >
-                  {item.label}
-                </a>
-              ))}
+              <a
+                href="/discover"
+                onClick={() => setMenuOpen(false)}
+                className="text-2xl text-white/60 hover:text-white transition"
+              >
+                Discover
+              </a>
+
+              <a
+                href="/gigs"
+                onClick={() => setMenuOpen(false)}
+                className="text-2xl text-white/60 hover:text-white transition"
+              >
+                Gigs
+              </a>
 
               <div className="flex flex-col items-center gap-4 mt-4 w-full">
-                <a href="/auth" onClick={() => setMenuOpen(false)} className="text-white/50 hover:text-white transition text-lg">
+                <a
+                  href="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-white/50 hover:text-white transition text-lg"
+                >
                   Log in
                 </a>
-                <a href="/auth" onClick={() => setMenuOpen(false)} className="w-full">
-                  <button className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 rounded-full transition text-lg">
-                    Join free
-                  </button>
+
+                <a
+                  href="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full bg-orange-400 hover:bg-orange-500 text-black font-bold py-4 rounded-full transition text-lg text-center"
+                >
+                  Join free
                 </a>
               </div>
             </div>
