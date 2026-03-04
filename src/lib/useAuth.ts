@@ -25,24 +25,26 @@ export function useAuth() {
           .single()
 
         if (!existing) {
-          const meta = session.user.user_metadata
-          const name = meta.full_name ?? meta.name ?? 'Creative'
-          const username = (meta.email ?? session.user.email ?? '')
-            .split('@')[0]
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '')
+  const meta = session.user.user_metadata
+  const name = meta.full_name ?? meta.name ?? 'Creative'
+  const username = (meta.email ?? session.user.email ?? '')
+    .split('@')[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
 
-          await supabase.from('profiles').insert({
-            id: session.user.id,
-            name,
-            username,
-            avatar_url: meta.avatar_url ?? meta.picture ?? '',
-            category: '',
-            bio: '',
-            location: '',
-            available: true,
-          })
-        }
+  await supabase.from('profiles').insert({
+    id: session.user.id,
+    name,
+    username,
+    avatar_url: meta.avatar_url ?? meta.picture ?? '',
+    category: '',
+    bio: '',
+    location: '',
+    available: true,
+  })
+
+  window.location.href = '/complete-profile'
+}
       }
     })
 

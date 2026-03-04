@@ -9,6 +9,7 @@ import Messages from './pages/Messages'
 import Notifications from './pages/Notifications'
 import EditProfile from './pages/EditProfile'
 import ProtectedRoute from './components/ProtectedRoute'
+import CompleteProfile from './pages/CompleteProfile'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
       </Routes>
     </BrowserRouter>
   )
