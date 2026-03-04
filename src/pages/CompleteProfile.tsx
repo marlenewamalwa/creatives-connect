@@ -24,7 +24,6 @@ export default function CompleteProfile() {
 
   useEffect(() => {
     if (!user) return
-    // If profile is already complete send to feed
     supabase
       .from('profiles')
       .select('category, location, avatar_url')
@@ -48,7 +47,7 @@ export default function CompleteProfile() {
     setLoading(true)
     setError('')
 
-    let avatar_url = avatarPreview ?? ''
+    let avatar_url: string | undefined
 
     if (avatarFile) {
       const ext = avatarFile.name.split('.').pop()
@@ -57,10 +56,14 @@ export default function CompleteProfile() {
         .from('avatars')
         .upload(path, avatarFile, { upsert: true })
 
-      if (!uploadError) {
-        const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-        avatar_url = data.publicUrl
+      if (uploadError) {
+        setError('Failed to upload avatar')
+        setLoading(false)
+        return
       }
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      avatar_url = data.publicUrl
     }
 
     const { error: updateError } = await supabase
@@ -69,16 +72,17 @@ export default function CompleteProfile() {
         category: form.category,
         location: form.location,
         bio: form.bio,
-        avatar_url,
+        ...(avatar_url && { avatar_url }),
       })
       .eq('id', user.id)
 
     if (updateError) {
       setError(updateError.message)
-    } else {
-      navigate('/feed')
+      setLoading(false)
+      return
     }
 
+    navigate('/feed')
     setLoading(false)
   }
 
@@ -92,7 +96,8 @@ export default function CompleteProfile() {
 
       <div className="flex flex-1 items-center justify-center px-6 py-16">
         <div className="w-full max-w-md">
-          <h1 className="text-3xl font-extrabold mb-2">Complete your creative profile to get started</h1>
+          <h1 className="text-3xl font-extrabold mb-2">One last step! 🎉</h1>
+          <p className="text-white/40 mb-8">Complete your creative profile to get started</p>
 
           <div className="flex flex-col gap-4">
 
@@ -164,7 +169,7 @@ export default function CompleteProfile() {
               disabled={loading || !form.category || !form.location}
               className="bg-orange-400 hover:bg-orange-500 disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition mt-2"
             >
-              {loading ? 'Saving...' : 'Finish setup'}
+              {loading ? 'Saving...' : 'Finish setup 🚀'}
             </button>
           </div>
         </div>

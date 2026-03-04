@@ -24,7 +24,6 @@ export function useAuth() {
           .single()
 
         if (!existing) {
-          // Brand new Google user — create profile and redirect
           const meta = session.user.user_metadata
           const name = meta.full_name ?? meta.name ?? 'Creative'
           const username = (meta.email ?? session.user.email ?? '')
@@ -46,7 +45,6 @@ export function useAuth() {
           window.location.href = '/complete-profile'
 
         } else if (!existing.category || !existing.location) {
-          // Profile exists but incomplete
           window.location.href = '/complete-profile'
         }
       }
