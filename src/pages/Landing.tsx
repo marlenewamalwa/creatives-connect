@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { ArrowRight, MapPin, Zap, Menu, X } from 'lucide-react'
+import { ArrowRight, MapPin, Zap} from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -35,8 +35,6 @@ export default function Landing() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [posts, setPosts] = useState<Post[]>([])
   const [activeCategory, setActiveCategory] = useState('All')
-  const [scrollY, setScrollY] = useState(0)
-  const [menuOpen, setMenuOpen] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -61,10 +59,6 @@ export default function Landing() {
         const profileMap = Object.fromEntries((profilesData ?? []).map((p) => [p.id, p]))
         setPosts(postsData.map((p) => ({ ...p, profiles: profileMap[p.user_id] })))
       })
-
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const filteredProfiles = activeCategory === 'All'
