@@ -12,8 +12,38 @@ export function useAuth() {
       setLoading(false)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
+      setLoading(false)
+
+      // Auto-create profile for Google users
+      if (event === 'SIGNED_IN' && session?.user) {
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single()
+
+        if (!existing) {
+          const meta = session.user.user_metadata
+          const name = meta.full_name ?? meta.name ?? 'Creative'
+          const username = (meta.email ?? session.user.email ?? '')
+            .split('@')[0]
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+
+          await supabase.from('profiles').insert({
+            id: session.user.id,
+            name,
+            username,
+            avatar_url: meta.avatar_url ?? meta.picture ?? '',
+            category: '',
+            bio: '',
+            location: '',
+            available: true,
+          })
+        }
+      }
     })
 
     return () => listener.subscription.unsubscribe()
