@@ -19,7 +19,7 @@ export function useAuth() {
       if (event === 'SIGNED_IN' && session?.user) {
         const { data: existing } = await supabase
           .from('profiles')
-          .select('id, category, location')
+          .select('id')
           .eq('id', session.user.id)
           .single()
 
@@ -41,11 +41,6 @@ export function useAuth() {
             location: '',
             available: true,
           })
-
-          window.location.href = '/complete-profile'
-
-        } else if (!existing.category || !existing.location) {
-          window.location.href = '/complete-profile'
         }
       }
     })
