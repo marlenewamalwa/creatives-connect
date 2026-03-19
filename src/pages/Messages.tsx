@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Send, Search, Home, Compass, Briefcase, Bell, MessageCircle } from 'lucide-react'
+import { Send, Search, MessageCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import Navbar from '../components/Navbar'

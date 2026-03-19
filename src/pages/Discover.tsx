@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, MapPin, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import Navbar from '../components/Navbar'
 
 type Profile = {
   id: string
