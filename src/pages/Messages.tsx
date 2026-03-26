@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Send, Search, MessageCircle } from 'lucide-react'
+import { Send, Search, MessageCircle, ArrowLeft } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
+import { useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 
 type Profile = {
@@ -30,12 +31,14 @@ type Conversation = {
 
 export default function Messages() {
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeProfile, setActiveProfile] = useState<Profile | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list')
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const timeAgo = (date: string) => {
@@ -47,7 +50,6 @@ export default function Messages() {
     return `${Math.floor(hrs / 24)}d ago`
   }
 
-  // Fetch all conversations
   const fetchConversations = async () => {
     if (!user) return
 
@@ -57,9 +59,8 @@ export default function Messages() {
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
       .order('created_at', { ascending: false })
 
-    if (!data) return
+    if (!data) { setLoading(false); return }
 
-    // Get unique user ids we've chatted with
     const userIds = [...new Set(
       data.map((m) => m.sender_id === user.id ? m.receiver_id : m.sender_id)
     )]
@@ -72,9 +73,7 @@ export default function Messages() {
       .in('id', userIds)
 
     const convos: Conversation[] = (profilesData ?? []).map((p) => {
-      const msgs = data.filter(
-        (m) => m.sender_id === p.id || m.receiver_id === p.id
-      )
+      const msgs = data.filter((m) => m.sender_id === p.id || m.receiver_id === p.id)
       const last = msgs[0]
       const unread = msgs.filter((m) => m.sender_id === p.id && !m.read).length
       return {
@@ -92,7 +91,6 @@ export default function Messages() {
     setLoading(false)
   }
 
-  // Fetch messages for active conversation
   const fetchMessages = async () => {
     if (!user || !activeProfile) return
 
@@ -106,7 +104,6 @@ export default function Messages() {
 
     setMessages(data ?? [])
 
-    // Mark messages as read
     await supabase
       .from('messages')
       .update({ read: true })
@@ -114,6 +111,22 @@ export default function Messages() {
       .eq('receiver_id', user.id)
       .eq('read', false)
   }
+
+  useEffect(() => {
+    const username = searchParams.get('user')
+    if (!username) return
+    supabase
+      .from('profiles')
+      .select('id, name, username, avatar_url, category')
+      .eq('username', username)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setActiveProfile(data)
+          setMobileView('chat')
+        }
+      })
+  }, [searchParams])
 
   useEffect(() => { fetchConversations() }, [user])
   useEffect(() => { fetchMessages() }, [activeProfile])
@@ -135,14 +148,19 @@ export default function Messages() {
     c.profile.name.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openChat = (profile: Profile) => {
+    setActiveProfile(profile)
+    setMobileView('chat')
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
       <Navbar />
 
       <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 73px)' }}>
 
-        {/* Sidebar */}
-        <div className="w-80 border-r border-white/10 flex flex-col shrink-0">
+        {/* Sidebar — hidden on mobile when chat is open */}
+        <div className={`w-full md:w-80 border-r border-white/10 flex flex-col shrink-0 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-white/10">
             <h2 className="font-bold text-lg mb-3">Messages</h2>
             <div className="relative">
@@ -158,16 +176,14 @@ export default function Messages() {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {loading && (
-              <p className="text-center text-white/30 text-sm py-10">Loading...</p>
-            )}
+            {loading && <p className="text-center text-white/30 text-sm py-10">Loading...</p>}
             {!loading && filtered.length === 0 && (
               <p className="text-center text-white/30 text-sm py-10">No conversations yet</p>
             )}
             {filtered.map((convo) => (
               <div
                 key={convo.profile.id}
-                onClick={() => setActiveProfile(convo.profile)}
+                onClick={() => openChat(convo.profile)}
                 className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition border-b border-white/5 ${
                   activeProfile?.id === convo.profile.id
                     ? 'bg-orange-400/10 border-l-2 border-l-orange-400'
@@ -198,22 +214,41 @@ export default function Messages() {
           </div>
         </div>
 
-        {/* Chat window */}
+        {/* Chat window — full screen on mobile */}
         {activeProfile ? (
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10">
-              <img
-                src={activeProfile.avatar_url || `https://i.pravatar.cc/150?u=${activeProfile.id}`}
-                alt={activeProfile.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
+          <div className={`flex-1 flex flex-col ${mobileView === 'list' ? 'hidden md:flex' : 'flex'}`}>
+
+            {/* Chat header */}
+            <div className="flex items-center gap-3 px-4 md:px-6 py-4 border-b border-white/10">
+              {/* Back button on mobile */}
+              <button
+                onClick={() => setMobileView('list')}
+                className="md:hidden text-white/40 hover:text-white transition mr-1"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <a href={`/profile/${activeProfile.username}`}>
+                <img
+                  src={activeProfile.avatar_url || `https://i.pravatar.cc/150?u=${activeProfile.id}`}
+                  alt={activeProfile.name}
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                />
+              </a>
               <div>
-                <p className="font-semibold">{activeProfile.name}</p>
+                <a href={`/profile/${activeProfile.username}`}>
+                  <p className="font-semibold hover:text-orange-400 transition">{activeProfile.name}</p>
+                </a>
                 <p className="text-xs text-orange-400">{activeProfile.category}</p>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-3">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 flex flex-col gap-3">
+              {messages.length === 0 && (
+                <div className="text-center py-10 text-white/20 text-sm">
+                  No messages yet — say hello! 👋
+                </div>
+              )}
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
                   {msg.sender_id !== user?.id && (
@@ -223,7 +258,7 @@ export default function Messages() {
                       className="w-7 h-7 rounded-full object-cover mr-2 mt-1 shrink-0"
                     />
                   )}
-                  <div className={`max-w-xs lg:max-w-md flex flex-col gap-1 ${msg.sender_id === user?.id ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[75%] md:max-w-md flex flex-col gap-1 ${msg.sender_id === user?.id ? 'items-end' : 'items-start'}`}>
                     <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                       msg.sender_id === user?.id
                         ? 'bg-orange-400 text-black font-medium rounded-br-sm'
@@ -238,7 +273,8 @@ export default function Messages() {
               <div ref={bottomRef} />
             </div>
 
-            <div className="px-6 py-4 border-t border-white/10 flex items-center gap-3">
+            {/* Input */}
+            <div className="px-4 md:px-6 py-4 border-t border-white/10 flex items-center gap-3">
               <input
                 type="text"
                 placeholder={`Message ${activeProfile.name}...`}
@@ -257,7 +293,7 @@ export default function Messages() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-white/20">
+          <div className="hidden md:flex flex-1 items-center justify-center text-white/20">
             <div className="text-center">
               <MessageCircle size={40} className="mx-auto mb-3 opacity-30" />
               <p>Select a conversation to start messaging</p>

@@ -3,6 +3,7 @@ import { Heart, MessageCircle, UserPlus, Briefcase, Bell } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 type Notification = {
   id: string
@@ -34,7 +35,7 @@ const textMap: Record<string, string> = {
   like: 'liked your post',
   comment: 'commented on your post',
   follow: 'started following you',
-  gig: 'shortlisted you for a gig',
+  gig: 'applied to your gig',
 }
 
 export default function Notifications() {
@@ -80,7 +81,9 @@ export default function Notifications() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchNotifications() }, [user])
+  useEffect(() => {
+    fetchNotifications()
+  }, [user])
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime()
@@ -116,27 +119,30 @@ export default function Notifications() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-8 md:py-10">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-extrabold">Notifications</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold">Notifications</h1>
             {unreadCount > 0 && (
               <p className="text-sm text-white/40 mt-1">{unreadCount} unread</p>
             )}
           </div>
           {unreadCount > 0 && (
             <button onClick={markAllRead} className="text-sm text-orange-400 hover:underline transition">
-              Mark all as read
+              Mark all read
             </button>
           )}
         </div>
 
-        <div className="flex gap-2 mb-8 flex-wrap">
+        {/* Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
           {filters.map((f) => (
             <button
               key={f}
               onClick={() => setActive(f)}
-              className={`text-xs px-4 py-2 rounded-full border transition ${
+              className={`text-xs px-4 py-2 rounded-full border transition shrink-0 ${
                 active === f
                   ? 'bg-orange-400 border-orange-400 text-black font-bold'
                   : 'border-white/10 text-white/50 hover:border-orange-400 hover:text-white'
@@ -149,46 +155,69 @@ export default function Notifications() {
 
         {loading && <p className="text-center text-white/30 py-20">Loading...</p>}
 
+        {/* Notifications */}
         <div className="flex flex-col gap-2">
           {filtered.map((notif) => {
             const { icon: Icon, color } = iconMap[notif.type] ?? iconMap['like']
+
             return (
-              <div
+              <a
                 key={notif.id}
+                href={notif.from_profile ? `/profile/${notif.from_profile.username}` : '#'}
                 onClick={() => markRead(notif.id)}
-                className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition ${
-                  !notif.read
-                    ? 'bg-orange-400/5 border-orange-400/20 hover:bg-orange-400/10'
-                    : 'bg-white/5 border-white/5 hover:bg-white/10'
-                }`}
               >
-                <div className="relative shrink-0">
-                  <img
-                    src={notif.from_profile?.avatar_url || `https://i.pravatar.cc/150?u=${notif.from_user_id}`}
-                    alt={notif.from_profile?.name}
-                    className="w-11 h-11 rounded-full object-cover"
-                  />
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center">
-                    <Icon size={11} className={color} />
+                <div
+                  className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl border cursor-pointer transition ${
+                    !notif.read
+                      ? 'bg-orange-400/5 border-orange-400/20 hover:bg-orange-400/10'
+                      : 'bg-white/5 border-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  {/* Avatar + icon */}
+                  <div className="relative shrink-0">
+                    <img
+                      src={
+                        notif.from_profile?.avatar_url ||
+                        `https://i.pravatar.cc/150?u=${notif.from_user_id}`
+                      }
+                      alt={notif.from_profile?.name}
+                      className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center">
+                      <Icon size={11} className={color} />
+                    </div>
                   </div>
+
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">
+                      <span className="font-semibold">
+                        {notif.from_profile?.name ?? 'Someone'}
+                      </span>{' '}
+                      <span className="text-white/60">
+                        {textMap[notif.type] ?? 'interacted with you'}
+                      </span>
+                    </p>
+                    <p className="text-xs text-white/30 mt-0.5">
+                      {timeAgo(notif.created_at)}
+                    </p>
+                  </div>
+
+                  {/* Post preview */}
+                  {notif.post?.image_url && (
+                    <img
+                      src={notif.post.image_url}
+                      alt=""
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shrink-0"
+                    />
+                  )}
+
+                  {/* Unread dot */}
+                  {!notif.read && (
+                    <div className="w-2 h-2 bg-orange-400 rounded-full shrink-0" />
+                  )}
                 </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm">
-                    <span className="font-semibold">{notif.from_profile?.name ?? 'Someone'}</span>{' '}
-                    <span className="text-white/60">{textMap[notif.type] ?? 'interacted with you'}</span>
-                  </p>
-                  <p className="text-xs text-white/30 mt-0.5">{timeAgo(notif.created_at)}</p>
-                </div>
-
-                {notif.post?.image_url && (
-                  <img src={notif.post.image_url} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" />
-                )}
-
-                {!notif.read && (
-                  <div className="w-2 h-2 bg-orange-400 rounded-full shrink-0" />
-                )}
-              </div>
+              </a>
             )
           })}
         </div>
@@ -200,6 +229,8 @@ export default function Notifications() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   )
 }

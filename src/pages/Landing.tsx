@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
-import { ArrowRight, MapPin, Zap } from 'lucide-react'
+import { ArrowRight, MapPin, Zap} from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
 
 type Profile = {
   id: string
@@ -15,6 +17,7 @@ type Post = {
   id: string
   image_url: string
   caption: string
+  user_id: string
   profiles: { name: string; avatar_url: string; username: string }
 }
 
@@ -31,18 +34,15 @@ export default function Landing() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [posts, setPosts] = useState<Post[]>([])
   const [activeCategory, setActiveCategory] = useState('All')
-  const [scrollY, setScrollY] = useState(0)
   const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Fetch real creatives
     supabase
       .from('profiles')
       .select('id, name, category, location, avatar_url, username')
       .limit(8)
       .then(({ data }) => setProfiles(data ?? []))
 
-    // Fetch real posts
     supabase
       .from('posts')
       .select('id, image_url, caption, user_id')
@@ -58,10 +58,6 @@ export default function Landing() {
         const profileMap = Object.fromEntries((profilesData ?? []).map((p) => [p.id, p]))
         setPosts(postsData.map((p) => ({ ...p, profiles: profileMap[p.user_id] })))
       })
-
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const filteredProfiles = activeCategory === 'All'
@@ -82,71 +78,37 @@ export default function Landing() {
         .ticker-inner { animation: ticker 25s linear infinite; }
         .card-hover { transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease; }
         .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(251,146,60,0.15); }
-        .mask-fade { mask-image: linear-gradient(to bottom, black 60%, transparent 100%); }
       `}</style>
 
-      {/* Grain overlay */}
       <div className="grain fixed inset-0 pointer-events-none z-50 opacity-30" />
 
-      {/* Navbar */}
-      <nav className={`flex items-center justify-between px-8 py-5 fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrollY > 50 ? 'bg-[#080808]/95 backdrop-blur-md border-b border-white/5' : ''}`}>
-        <span className="text-xl font-bold tracking-tight">
-          creatives<span className="text-orange-400">connect</span>
-        </span>
-        <div className="hidden md:flex items-center gap-8 text-sm text-white/50">
-          <a href="/discover" className="hover:text-white transition">Discover</a>
-          <a href="/gigs" className="hover:text-white transition">Gigs</a>
-          <a href="/feed" className="hover:text-white transition">Feed</a>
-        </div>
-        <div className="flex gap-3 items-center">
-          <a href="/auth" className="text-sm text-white/50 hover:text-white transition">Log in</a>
-          <a href="/auth">
-            <button className="text-sm bg-orange-400 hover:bg-orange-500 text-black font-bold px-5 py-2.5 rounded-full transition flex items-center gap-2">
-              Join free <ArrowRight size={14} />
-            </button>
-          </a>
-        </div>
-      </nav>
+     
+
+     <Navbar/>
 
       {/* Hero */}
-      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 text-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-5 md:px-6 pt-28 pb-16 text-center overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-orange-500/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
 
-        {/* Radial glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-pink-500/5 rounded-full blur-[80px] pointer-events-none" />
-
-        {/* Floating profile avatars */}
+        {/* Floating avatars — desktop only */}
         {profiles.slice(0, 5).map((p, i) => {
-          const positions = [
-            'top-32 left-16', 'top-48 right-20', 'bottom-40 left-24',
-            'bottom-32 right-16', 'top-64 left-1/2'
-          ]
+          const positions = ['top-32 left-8', 'top-48 right-8', 'bottom-40 left-12', 'bottom-32 right-12', 'top-64 left-1/2']
           const delays = ['0s', '1s', '2s', '1.5s', '0.5s']
           return (
-            <div
-              key={p.id}
-              className={`absolute ${positions[i]} hidden lg:block float opacity-60`}
-              style={{ animationDelay: delays[i] }}
-            >
+            <div key={p.id} className={`absolute ${positions[i]} hidden lg:block float opacity-60`} style={{ animationDelay: delays[i] }}>
               <div className="relative">
-                <img
-                  src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`}
-                  alt={p.name}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-orange-400/30"
-                />
+                <img src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`} alt={p.name} className="w-12 h-12 rounded-full object-cover border-2 border-orange-400/30" />
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-[#080808]" />
               </div>
             </div>
           )
         })}
 
-        {/* Badge */}
-        <div className="fade-up inline-flex items-center gap-2 bg-orange-400/10 border border-orange-400/20 text-orange-400 text-xs font-semibold px-4 py-2 rounded-full mb-8 tracking-widest uppercase">
+        <div className="fade-up inline-flex items-center gap-2 bg-orange-400/10 border border-orange-400/20 text-orange-400 text-xs font-semibold px-4 py-2 rounded-full mb-6 tracking-widest uppercase">
           <Zap size={12} /> Kenya's Creative Network
         </div>
 
-        {/* Headline */}
-        <h1 className="fade-up playfair text-6xl md:text-8xl font-bold leading-none mb-6 max-w-4xl" style={{ animationDelay: '0.1s' }}>
+        <h1 className="fade-up playfair text-5xl md:text-7xl lg:text-8xl font-bold leading-none mb-5 max-w-4xl" style={{ animationDelay: '0.1s' }}>
           Where{' '}
           <span className="italic text-orange-400">Kenyan</span>
           <br />
@@ -154,26 +116,26 @@ export default function Landing() {
           <span className="italic">Connect</span>
         </h1>
 
-        <p className="fade-up text-white/40 text-lg max-w-lg leading-relaxed mb-10" style={{ animationDelay: '0.2s' }}>
+        <p className="fade-up text-white/40 text-base md:text-lg max-w-md leading-relaxed mb-8" style={{ animationDelay: '0.2s' }}>
           Showcase your work. Find your next collab. Land gigs.
           Built for photographers, designers, musicians, filmmakers and more.
         </p>
 
-        <div className="fade-up flex flex-col sm:flex-row gap-3 items-center" style={{ animationDelay: '0.3s' }}>
-          <a href="/auth">
-            <button className="bg-orange-400 hover:bg-orange-500 text-black font-bold px-8 py-4 rounded-full transition flex items-center gap-2 text-base">
+        <div className="fade-up flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto" style={{ animationDelay: '0.3s' }}>
+          <a href="/auth" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto bg-orange-400 hover:bg-orange-500 text-black font-bold px-8 py-4 rounded-full transition flex items-center justify-center gap-2 text-base">
               Start for free <ArrowRight size={18} />
             </button>
           </a>
-          <a href="/discover">
-            <button className="border border-white/15 hover:border-white/40 text-white/60 hover:text-white px-8 py-4 rounded-full transition text-base">
+          <a href="/discover" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto border border-white/15 hover:border-white/40 text-white/60 hover:text-white px-8 py-4 rounded-full transition text-base">
               Browse creatives
             </button>
           </a>
         </div>
 
-        {/* Stats row */}
-        <div className="fade-up flex flex-wrap justify-center gap-8 mt-16" style={{ animationDelay: '0.4s' }}>
+        {/* Stats */}
+        <div className="fade-up grid grid-cols-2 md:flex md:flex-wrap justify-center gap-6 md:gap-8 mt-14 w-full max-w-sm md:max-w-none" style={{ animationDelay: '0.4s' }}>
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-2xl font-bold text-orange-400">{s.value}</p>
@@ -196,34 +158,28 @@ export default function Landing() {
 
       {/* Portfolio grid */}
       {posts.length > 0 && (
-        <section className="px-6 py-24 max-w-6xl mx-auto">
-          <div className="flex items-end justify-between mb-12">
+        <section className="px-5 md:px-6 py-16 md:py-24 max-w-6xl mx-auto">
+          <div className="flex items-end justify-between mb-8 md:mb-12">
             <div>
               <p className="text-xs text-orange-400 uppercase tracking-widest mb-2">Latest Work</p>
-              <h2 className="playfair text-4xl md:text-5xl font-bold">Fresh from<br /><span className="italic">the community</span></h2>
+              <h2 className="playfair text-3xl md:text-5xl font-bold">Fresh from<br /><span className="italic">the community</span></h2>
             </div>
             <a href="/feed" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
               View all <ArrowRight size={16} />
             </a>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
             {posts.map((post, i) => (
               <a href="/feed" key={post.id}>
-                <div className={`card-hover relative rounded-2xl overflow-hidden cursor-pointer ${i === 0 ? 'row-span-2' : ''}`}
-                  style={{ aspectRatio: i === 0 ? '1/2' : '1/1' }}>
-                  <img
-                    src={post.image_url}
-                    alt={post.caption}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <img
-                        src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.id}`}
-                        alt=""
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
+                <div
+                  className={`card-hover relative rounded-xl md:rounded-2xl overflow-hidden cursor-pointer ${i === 0 ? 'row-span-2' : ''}`}
+                  style={{ aspectRatio: i === 0 ? '1/2' : '1/1' }}
+                >
+                  <img src={post.image_url} alt={post.caption} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 md:p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <img src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.id}`} alt="" className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover" />
                       <span className="text-xs font-medium">{post.profiles?.name}</span>
                     </div>
                     <p className="text-xs text-white/70 line-clamp-2">{post.caption}</p>
@@ -232,15 +188,23 @@ export default function Landing() {
               </a>
             ))}
           </div>
+
+          <div className="flex justify-center mt-6 md:hidden">
+            <a href="/feed">
+              <button className="border border-white/15 text-white/60 px-6 py-3 rounded-full text-sm">
+                View all posts <ArrowRight size={14} className="inline ml-1" />
+              </button>
+            </a>
+          </div>
         </section>
       )}
 
       {/* Creatives section */}
-      <section className="px-6 py-24 max-w-6xl mx-auto">
-        <div className="flex items-end justify-between mb-10">
+      <section className="px-5 md:px-6 py-16 md:py-24 max-w-6xl mx-auto">
+        <div className="flex items-end justify-between mb-8 md:mb-10">
           <div>
             <p className="text-xs text-orange-400 uppercase tracking-widest mb-2">The Talent</p>
-            <h2 className="playfair text-4xl md:text-5xl font-bold">Meet the<br /><span className="italic">creatives</span></h2>
+            <h2 className="playfair text-3xl md:text-5xl font-bold">Meet the<br /><span className="italic">creatives</span></h2>
           </div>
           <a href="/discover" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
             See all <ArrowRight size={16} />
@@ -248,12 +212,12 @@ export default function Landing() {
         </div>
 
         {/* Category filter */}
-        <div className="flex gap-2 flex-wrap mb-10">
+        <div className="flex gap-2 flex-nowrap overflow-x-auto pb-2 mb-8 scrollbar-hide">
           {['All', ...categories].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-xs px-4 py-2 rounded-full border transition ${
+              className={`text-xs px-4 py-2 rounded-full border transition shrink-0 ${
                 activeCategory === cat
                   ? 'bg-orange-400 border-orange-400 text-black font-bold'
                   : 'border-white/10 text-white/40 hover:border-orange-400/50 hover:text-white'
@@ -269,19 +233,19 @@ export default function Landing() {
             <p>No creatives in this category yet — be the first!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {filteredProfiles.map((p) => (
               <a href={`/profile/${p.username}`} key={p.id}>
-                <div className="card-hover bg-white/[0.03] border border-white/8 rounded-2xl p-5 flex flex-col items-center text-center cursor-pointer">
+                <div className="card-hover bg-white/[0.03] border border-white/8 rounded-xl md:rounded-2xl p-4 md:p-5 flex flex-col items-center text-center cursor-pointer">
                   <div className="relative mb-3">
                     <img
                       src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`}
                       alt={p.name}
-                      className="w-16 h-16 rounded-full object-cover border border-white/10"
+                      className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border border-white/10"
                     />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-[#080808] rounded-full" />
+                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 md:w-4 md:h-4 bg-green-400 border-2 border-[#080808] rounded-full" />
                   </div>
-                  <p className="font-semibold text-sm">{p.name}</p>
+                  <p className="font-semibold text-xs md:text-sm">{p.name}</p>
                   <p className="text-xs text-orange-400 mt-0.5">{p.category}</p>
                   {p.location && (
                     <p className="text-xs text-white/30 mt-1 flex items-center gap-1 justify-center">
@@ -293,38 +257,37 @@ export default function Landing() {
             ))}
           </div>
         )}
+
+        <div className="flex justify-center mt-8 md:hidden">
+          <a href="/discover">
+            <button className="border border-white/15 text-white/60 px-6 py-3 rounded-full text-sm">
+              See all creatives <ArrowRight size={14} className="inline ml-1" />
+            </button>
+          </a>
+        </div>
       </section>
 
       {/* CTA */}
-      <section className="px-6 py-32 relative overflow-hidden">
+      <section className="px-5 md:px-6 py-20 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-pink-500/5 pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
           <p className="text-xs text-orange-400 uppercase tracking-widest mb-4">Ready?</p>
-          <h2 className="playfair text-5xl md:text-7xl font-bold leading-none mb-6">
+          <h2 className="playfair text-4xl md:text-6xl lg:text-7xl font-bold leading-none mb-6">
             Your work deserves<br />
             <span className="italic text-orange-400">to be seen.</span>
           </h2>
-          <p className="text-white/40 text-lg max-w-md mx-auto mb-10">
+          <p className="text-white/40 text-base md:text-lg max-w-md mx-auto mb-8 md:mb-10">
             Join thousands of Kenyan creatives already building their brand on CreativesConnect.
           </p>
           <a href="/auth">
-            <button className="bg-orange-400 hover:bg-orange-500 text-black font-bold px-10 py-5 rounded-full transition text-lg flex items-center gap-3 mx-auto">
+            <button className="bg-orange-400 hover:bg-orange-500 text-black font-bold px-8 md:px-10 py-4 md:py-5 rounded-full transition text-base md:text-lg flex items-center gap-3 mx-auto">
               Create your profile <ArrowRight size={20} />
             </button>
           </a>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-8 py-8 flex flex-col md:flex-row items-center justify-between text-white/20 text-xs gap-4">
-        <span className="text-base font-bold text-white/40">creatives<span className="text-orange-400">connect</span></span>
-        <span>© 2026 CreativesConnect Kenya — Made with 🧡 in Nairobi</span>
-        <div className="flex gap-6">
-          <a href="/discover" className="hover:text-white transition">Discover</a>
-          <a href="/gigs" className="hover:text-white transition">Gigs</a>
-          <a href="/auth" className="hover:text-white transition">Sign up</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
