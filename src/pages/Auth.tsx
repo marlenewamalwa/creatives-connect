@@ -68,12 +68,12 @@ if (!data.user) {
 }
     const username = form.name.toLowerCase().replace(/\s+/g, '')
 
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      name: form.name,
-      username,
-      available: true,
-    })
+   const { error: profileError } = await supabase.from('profiles').upsert({
+  id: data.user.id,
+  name: form.name,
+  username,
+  available: true,
+})
 
     if (profileError) {
   console.log('Profile insert error:', JSON.stringify(profileError, null, 2)) // 👈 add this
