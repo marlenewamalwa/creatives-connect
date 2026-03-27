@@ -22,22 +22,15 @@ export default function Auth() {
     setError('')
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    })
+  email: form.email,
+  password: form.password,
+})
 
-    if (error) {
-      setError(error.message)
-    } else {
-      // Fix: use username from profiles table, not UUID
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', data.user?.id)
-        .single()
-
-      navigate(`/profile/${profile?.username ?? data.user?.id}`)
-    }
+if (error) {
+  setError(error.message)
+} else {
+  navigate(`/profile/${data.user?.id}`)
+}
 
     setLoading(false)
   }
@@ -45,12 +38,6 @@ export default function Auth() {
   const handleSignup = async () => {
     setLoading(true)
     setError('')
-
-    if (!form.username.trim()) {
-      setError('Username is required')
-      setLoading(false)
-      return
-    }
 
     if (form.password.length < 6) {
       setError('Password must be at least 6 characters')
@@ -61,12 +48,6 @@ export default function Auth() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: {
-        data: {
-          name: form.name,
-          username: form.username,
-        },
-      },
     })
 
     if (error) {
@@ -75,41 +56,40 @@ export default function Auth() {
       return
     }
 
+    // 🚨 handles email confirmation case
     if (!data.session) {
       setError('Check your email to confirm signup')
       setLoading(false)
       return
     }
+if (!data.user) {
+  setError('Signup failed. Please try again.')
+  setLoading(false)
+  return
+}
+   
 
-    if (!data.user) {
-      setError('Signup failed. Please try again.')
-      setLoading(false)
-      return
-    }
-
-    console.log('Upserting profile for user:', data.user.id, form.name, form.username)
-
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: data.user.id,
-      name: form.name,
-      username: form.username,
-      available: true,
-    })
+   const { error: profileError } = await supabase.from('profiles').upsert({
+  id: data.user.id,
+  name: form.name,
+  username: form.username,  
+  available: true,
+})
 
     if (profileError) {
-      console.log('Profile insert error:', JSON.stringify(profileError, null, 2))
-      setError(profileError.message)
-      setLoading(false)
-      return
-    }
+  console.log('Profile insert error:', JSON.stringify(profileError, null, 2))
+  setError(profileError.message)
+  setLoading(false)
+  return
+}
 
-    navigate(`/profile/${form.username}`)
+    navigate(`/profile/${data.user?.id}`)
     setLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
-
+      
       <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
         <a href="/" className="text-xl font-bold tracking-tight">
           creatives<span className="text-orange-400">connect</span>
@@ -127,7 +107,7 @@ export default function Auth() {
 
           {mode === 'login' && (
             <div>
-              <h1 className="text-3xl font-extrabold mb-2">Welcome back</h1>
+              <h1 className="text-3xl font-extrabold mb-2">Welcome back </h1>
               <p className="text-white/40 mb-8">Log in to your CreativesConnect account</p>
 
               <div className="flex flex-col gap-4">
@@ -173,12 +153,12 @@ export default function Auth() {
                   className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm"
                 />
                 <input
-                  type="text"
-                  placeholder="Username"
-                  value={form.username}
-                  onChange={(e) => update('username', e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm"
-                />
+  type="text"
+  placeholder="Username"
+  value={form.username}
+  onChange={(e) => update('username', e.target.value)}
+  className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm"
+/>
                 <input
                   type="email"
                   placeholder="Email address"
@@ -198,10 +178,10 @@ export default function Auth() {
 
                 <button
                   onClick={handleSignup}
-                  disabled={loading || !form.name || !form.username || !form.email || !form.password}
+                  disabled={loading || !form.name || !form.email || !form.password}
                   className="bg-orange-400 text-black font-bold py-3 rounded-xl"
                 >
-                  {loading ? 'Creating profile...' : 'Create my profile'}
+                  {loading ? 'Creating profile...' : 'Create my profile '}
                 </button>
               </div>
             </div>
