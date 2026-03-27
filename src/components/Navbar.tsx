@@ -115,7 +115,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
 
                     <div className="absolute right-0 top-10 bg-[#111] border border-white/10 rounded-xl p-2 w-44 z-20">
 
-                      <a href={`/profile/${profile?.username ?? ''}`} onClick={() => setDropdownOpen(false)}>
+                      <a href={profile ? `/profile/${profile.username}` : '#'} onClick={() => setDropdownOpen(false)}>
                         <button className="w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition">
                           My Profile
                         </button>
@@ -209,7 +209,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
                   { href: '/gigs', icon: <Briefcase size={20} />, label: 'Gigs' },
                   { href: '/messages', icon: <MessageCircle size={20} />, label: 'Messages' },
                   { href: '/notifications', icon: <Bell size={20} />, label: 'Notifications' },
-                  { href: `/profile/${profile?.username}`, label: 'My Profile' },
+                  { href: profile ? `/profile/${profile.username}` : '#', label: 'My Profile' },
                   { href: '/edit-profile', label: 'Edit Profile' },
                 ].map((item) => (
                   <a
