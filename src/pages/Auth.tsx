@@ -28,23 +28,29 @@ export default function Auth() {
 
     if (error) {
       setError(error.message)
-      setLoading(false)
-      return
+    } else {
+      // Fix: use username from profiles table, not UUID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', data.user?.id)
+        .single()
+
+      navigate(`/profile/${profile?.username ?? data.user?.id}`)
     }
 
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', data.user.id)
-      .single()
-
-    navigate(`/profile/${profileData?.username}`)
     setLoading(false)
   }
 
   const handleSignup = async () => {
     setLoading(true)
     setError('')
+
+    if (!form.username.trim()) {
+      setError('Username is required')
+      setLoading(false)
+      return
+    }
 
     if (form.password.length < 6) {
       setError('Password must be at least 6 characters')
@@ -55,6 +61,12 @@ export default function Auth() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        data: {
+          name: form.name,
+          username: form.username,
+        },
+      },
     })
 
     if (error) {
@@ -75,6 +87,8 @@ export default function Auth() {
       return
     }
 
+    console.log('Upserting profile for user:', data.user.id, form.name, form.username)
+
     const { error: profileError } = await supabase.from('profiles').upsert({
       id: data.user.id,
       name: form.name,
@@ -83,11 +97,8 @@ export default function Auth() {
     })
 
     if (profileError) {
-      if (profileError.code === '23505') {
-        setError('Username is already taken')
-      } else {
-        setError(profileError.message)
-      }
+      console.log('Profile insert error:', JSON.stringify(profileError, null, 2))
+      setError(profileError.message)
       setLoading(false)
       return
     }
@@ -116,7 +127,7 @@ export default function Auth() {
 
           {mode === 'login' && (
             <div>
-              <h1 className="text-3xl font-extrabold mb-2">Welcome back 👋</h1>
+              <h1 className="text-3xl font-extrabold mb-2">Welcome back</h1>
               <p className="text-white/40 mb-8">Log in to your CreativesConnect account</p>
 
               <div className="flex flex-col gap-4">
@@ -190,7 +201,7 @@ export default function Auth() {
                   disabled={loading || !form.name || !form.username || !form.email || !form.password}
                   className="bg-orange-400 text-black font-bold py-3 rounded-xl"
                 >
-                  {loading ? 'Creating profile...' : 'Create my profile 🎉'}
+                  {loading ? 'Creating profile...' : 'Create my profile'}
                 </button>
               </div>
             </div>
