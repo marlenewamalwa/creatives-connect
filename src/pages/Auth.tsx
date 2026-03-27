@@ -83,7 +83,7 @@ if (!data.user) {
   return
 }
 
-    navigate(`/profile/${data.user?.id}`)
+    navigate(`/profile/${form.username}`)
     setLoading(false)
   }
 

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Search, MapPin, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 type Profile = {
   id: string
@@ -47,22 +49,7 @@ export default function Discover() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
 
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
-        <a href="/" className="text-xl font-bold tracking-tight">
-          creatives<span className="text-orange-400">connect</span>
-        </a>
-        <div className="flex gap-3">
-          <a href="/auth">
-            <button className="text-sm text-white/60 hover:text-white transition">Log in</button>
-          </a>
-          <a href="/auth">
-            <button className="text-sm bg-orange-400 hover:bg-orange-500 text-black font-semibold px-4 py-2 rounded-full transition">
-              Join now
-            </button>
-          </a>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-6xl mx-auto px-6 py-12">
 
@@ -192,6 +179,7 @@ export default function Discover() {
           </div>
         )}
       </div>
+       <Footer />
     </div>
   )
 }
