@@ -6,7 +6,16 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 
 const categories = ['Photography', 'Design', 'Music', 'Film', 'Writing', 'Illustration', 'Fashion', 'Other']
-
+const counties = [
+  'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu',
+  'Garissa', 'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho',
+  'Kiambu', 'Kilifi', 'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui',
+  'Kwale', 'Laikipia', 'Lamu', 'Machakos', 'Makueni', 'Mandera',
+  'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a', 'Nairobi',
+  'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua', 'Nyeri',
+  'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River', 'Tharaka-Nithi',
+  'Trans Nzoia', 'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
+]
 export default function EditProfile() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -109,7 +118,7 @@ export default function EditProfile() {
     if (updateError) {
       setError(updateError.message)
     } else {
-      setSuccess('Profile updated successfully!')
+      setSuccess('We will review your profile and get back to you')
       setTimeout(() => navigate(`/profile/${form.username}`), 1000)
     }
 
@@ -209,15 +218,18 @@ export default function EditProfile() {
 
           {/* Location */}
           <div>
-            <p className="text-xs text-white/40 mb-1.5 uppercase tracking-widest">Location</p>
-            <input
-              type="text"
-              value={form.location}
-              onChange={(e) => update('location', e.target.value)}
-              placeholder="e.g. Nairobi, Kenya"
-              className="w-full bg-white/5 border border-white/10 focus:border-orange-400 outline-none rounded-xl px-4 py-3 text-sm placeholder:text-white/30 transition"
-            />
-          </div>
+  <p className="text-xs text-white/40 mb-1.5 uppercase tracking-widest">County</p>
+  <select
+    value={form.location}
+    onChange={(e) => update('location', e.target.value)}
+    className="w-full bg-white/5 border border-white/10 focus:border-orange-400 outline-none rounded-xl px-4 py-3 text-sm text-white transition"
+  >
+    <option value="" disabled className="bg-[#0a0a0a]">Select your county</option>
+    {counties.map((county) => (
+      <option key={county} value={county} className="bg-[#0a0a0a]">{county}</option>
+    ))}
+  </select>
+</div>
 
           {/* Social links */}
           <div>
@@ -254,20 +266,7 @@ export default function EditProfile() {
             </div>
           </div>
 
-          {/* Availability toggle */}
-          <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-            <div>
-              <p className="text-sm font-medium">Available for work</p>
-              <p className="text-xs text-white/40 mt-0.5">Show others you're open to gigs and collabs</p>
-            </div>
-            <button
-              onClick={() => update('available', !form.available)}
-              className={`w-10 h-6 rounded-full transition relative shrink-0 ${form.available ? 'bg-orange-400' : 'bg-white/10'}`}
-            >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${form.available ? 'left-5' : 'left-1'}`} />
-            </button>
-          </div>
-
+  
           {/* Error / success */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-xl">
@@ -286,9 +285,11 @@ export default function EditProfile() {
             disabled={saving}
             className="bg-orange-400 hover:bg-orange-500 disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold py-3 rounded-xl transition mt-2"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Submitiing...' : 'Submit'}
           </button>
-
+<p className="text-xs text-white/40 text-center">
+  We'll review your profile and get back to you shortly.
+</p>
         </div>
       </div>
     </div>

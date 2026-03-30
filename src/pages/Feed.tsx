@@ -130,7 +130,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string |
       {/* Post header */}
       <div className="flex items-center gap-3 p-4">
         <img
-          src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.user_id}`}
+          src={post.profiles?.avatar_url}
           alt={post.profiles?.name}
           className="w-10 h-10 rounded-full object-cover"
         />
@@ -195,7 +195,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string |
               {comments.map((c) => (
                 <div key={c.id} className="flex items-start gap-2">
                   <img
-                    src={c.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${c.user_id}`}
+                    src={c.profiles?.avatar_url}
                     alt={c.profiles?.name}
                     className="w-7 h-7 rounded-full object-cover shrink-0"
                   />
@@ -396,7 +396,7 @@ export default function Feed() {
           {profile && (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-5 flex items-center gap-3">
               <img
-                src={profile.avatar_url || `https://i.pravatar.cc/150?u=${user?.id}`}
+                src={profile.avatar_url}
                 alt="me"
                 className="w-12 h-12 rounded-full object-cover"
               />

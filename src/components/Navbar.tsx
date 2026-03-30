@@ -79,7 +79,7 @@ export default function Navbar({ onPost }: { onPost?: () => void }) {
             <Link to="/notifications" className="hover:text-white transition relative flex flex-col items-center text-xs">
               <Bell size={20} />
               <span>Alerts</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full" />
+             
             </Link>
 
           </div>

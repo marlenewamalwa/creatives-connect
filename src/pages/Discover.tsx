@@ -3,6 +3,7 @@ import { Search, MapPin, SlidersHorizontal } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { Link } from 'react-router-dom'
 
 type Profile = {
   id: string
@@ -144,11 +145,11 @@ export default function Discover() {
         {!loading && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map((p) => (
-              <a href={`/profile/${p.username}`} key={p.id}>
+              <Link to={`/profile/${p.username}`} key={p.id}>
                 <div className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-400/30 rounded-2xl p-5 flex flex-col items-center text-center cursor-pointer transition">
                   <div className="relative mb-3">
                     <img
-                      src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`}
+                      src={p.avatar_url}
                       alt={p.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -167,7 +168,7 @@ export default function Discover() {
                     View Profile
                   </button>
                 </div>
-              </a>
+              </Link>
             ))}
 
             {!loading && filtered.length === 0 && (

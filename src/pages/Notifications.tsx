@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { Link } from 'react-router-dom'
 
 type Notification = {
   id: string
@@ -161,11 +162,11 @@ export default function Notifications() {
             const { icon: Icon, color } = iconMap[notif.type] ?? iconMap['like']
 
             return (
-              <a
-                key={notif.id}
-                href={notif.from_profile ? `/profile/${notif.from_profile.username}` : '#'}
-                onClick={() => markRead(notif.id)}
-              >
+             <Link
+  key={notif.id}
+  to={notif.from_profile ? `/profile/${notif.from_profile.username}` : '#'}
+  onClick={() => markRead(notif.id)}
+>
                 <div
                   className={`flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl border cursor-pointer transition ${
                     !notif.read
@@ -177,9 +178,7 @@ export default function Notifications() {
                   <div className="relative shrink-0">
                     <img
                       src={
-                        notif.from_profile?.avatar_url ||
-                        `https://i.pravatar.cc/150?u=${notif.from_user_id}`
-                      }
+                        notif.from_profile?.avatar_url }
                       alt={notif.from_profile?.name}
                       className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover"
                     />
@@ -217,7 +216,7 @@ export default function Notifications() {
                     <div className="w-2 h-2 bg-orange-400 rounded-full shrink-0" />
                   )}
                 </div>
-              </a>
+              </Link>
             )
           })}
         </div>

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import { useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import { Link } from 'react-router-dom'
 
 type Profile = {
   id: string
@@ -192,7 +193,7 @@ export default function Messages() {
               >
                 <div className="relative shrink-0">
                   <img
-                    src={convo.profile.avatar_url || `https://i.pravatar.cc/150?u=${convo.profile.id}`}
+                    src={convo.profile.avatar_url }
                     alt={convo.profile.name}
                     className="w-11 h-11 rounded-full object-cover"
                   />
@@ -227,17 +228,17 @@ export default function Messages() {
               >
                 <ArrowLeft size={20} />
               </button>
-              <a href={`/profile/${activeProfile.username}`}>
+              <Link to={`/profile/${activeProfile.username}`}>
                 <img
-                  src={activeProfile.avatar_url || `https://i.pravatar.cc/150?u=${activeProfile.id}`}
+                  src={activeProfile.avatar_url}
                   alt={activeProfile.name}
                   className="w-10 h-10 rounded-full object-cover cursor-pointer"
                 />
-              </a>
+              </Link>
               <div>
-                <a href={`/profile/${activeProfile.username}`}>
+                <Link to={`/profile/${activeProfile.username}`}>
                   <p className="font-semibold hover:text-orange-400 transition">{activeProfile.name}</p>
-                </a>
+                </Link>
                 <p className="text-xs text-orange-400">{activeProfile.category}</p>
               </div>
             </div>
@@ -253,7 +254,7 @@ export default function Messages() {
                 <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
                   {msg.sender_id !== user?.id && (
                     <img
-                      src={activeProfile.avatar_url || `https://i.pravatar.cc/150?u=${activeProfile.id}`}
+                      src={activeProfile.avatar_url}
                       alt=""
                       className="w-7 h-7 rounded-full object-cover mr-2 mt-1 shrink-0"
                     />

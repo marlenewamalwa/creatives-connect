@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 export default function Auth() {
   const navigate = useNavigate()
@@ -91,9 +92,9 @@ if (!data.user) {
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
       
       <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
-        <a href="/" className="text-xl font-bold tracking-tight">
+        <Link to="/" className="text-xl font-bold tracking-tight">
           creatives<span className="text-orange-400">connect</span>
-        </a>
+        </Link>
         <button
           onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError('') }}
           className="text-sm text-white/50 hover:text-white transition"

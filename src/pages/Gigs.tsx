@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/useAuth'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { Link } from 'react-router-dom'
 
 type Gig = {
   id: string
@@ -291,7 +292,7 @@ export default function Gigs() {
                 <div key={gig.id} onClick={() => openDetail(gig)}
                   className={`border rounded-2xl p-4 cursor-pointer transition ${selected?.id === gig.id ? 'border-orange-400 bg-orange-400/5' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
                   <div className="flex items-start gap-3">
-                    <img src={gig.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${gig.user_id}`} alt={gig.company}
+                    <img src={gig.profiles?.avatar_url } alt={gig.company}
                       className="w-10 h-10 rounded-xl object-cover shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -331,7 +332,7 @@ export default function Gigs() {
                   </button>
 
                   <div className="flex items-start gap-4 mb-6">
-                    <img src={selected.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${selected.user_id}`} alt={selected.company}
+                    <img src={selected.profiles?.avatar_url} alt={selected.company}
                       className="w-12 md:w-14 h-12 md:h-14 rounded-2xl object-cover" />
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -375,11 +376,11 @@ export default function Gigs() {
                         </button>
                       )
                     ) : (
-                      <a href="/auth">
+                      <Link to="/auth">
                         <button className="bg-orange-400 hover:bg-orange-500 text-black font-bold px-6 py-3 rounded-xl transition">
                           Log in to Apply
                         </button>
-                      </a>
+                      </Link>
                     )}
                   </div>
                 </div>

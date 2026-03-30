@@ -3,6 +3,8 @@ import { ArrowRight, MapPin, Zap} from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
+import { Link } from 'react-router-dom'
+import FeedbackForm from '../components/FeedbackForm'
 
 type Profile = {
   id: string
@@ -97,7 +99,7 @@ export default function Landing() {
           return (
             <div key={p.id} className={`absolute ${positions[i]} hidden lg:block float opacity-60`} style={{ animationDelay: delays[i] }}>
               <div className="relative">
-                <img src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`} alt={p.name} className="w-12 h-12 rounded-full object-cover border-2 border-orange-400/30" />
+                <img src={p.avatar_url } alt={p.name} className="w-12 h-12 rounded-full object-cover border-2 border-orange-400/30" />
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-[#080808]" />
               </div>
             </div>
@@ -122,16 +124,16 @@ export default function Landing() {
         </p>
 
         <div className="fade-up flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto" style={{ animationDelay: '0.3s' }}>
-          <a href="/auth" className="w-full sm:w-auto">
+          <Link to="/auth" className="w-full sm:w-auto">
             <button className="w-full sm:w-auto bg-orange-400 hover:bg-orange-500 text-black font-bold px-8 py-4 rounded-full transition flex items-center justify-center gap-2 text-base">
               Start for free <ArrowRight size={18} />
             </button>
-          </a>
-          <a href="/discover" className="w-full sm:w-auto">
+          </Link>
+          <Link to="/discover" className="w-full sm:w-auto">
             <button className="w-full sm:w-auto border border-white/15 hover:border-white/40 text-white/60 hover:text-white px-8 py-4 rounded-full transition text-base">
               Browse creatives
             </button>
-          </a>
+          </Link>
         </div>
 
         {/* Stats */}
@@ -164,14 +166,14 @@ export default function Landing() {
               <p className="text-xs text-orange-400 uppercase tracking-widest mb-2">Latest Work</p>
               <h2 className="playfair text-3xl md:text-5xl font-bold">Fresh from<br /><span className="italic">the community</span></h2>
             </div>
-            <a href="/feed" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
+            <Link to="/feed" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
               View all <ArrowRight size={16} />
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
             {posts.map((post, i) => (
-              <a href="/feed" key={post.id}>
+              <Link to="/feed" key={post.id}>
                 <div
                   className={`card-hover relative rounded-xl md:rounded-2xl overflow-hidden cursor-pointer ${i === 0 ? 'row-span-2' : ''}`}
                   style={{ aspectRatio: i === 0 ? '1/2' : '1/1' }}
@@ -179,22 +181,22 @@ export default function Landing() {
                   <img src={post.image_url} alt={post.caption} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 md:p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <img src={post.profiles?.avatar_url || `https://i.pravatar.cc/150?u=${post.id}`} alt="" className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover" />
+                      <img src={post.profiles?.avatar_url } alt="" className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover" />
                       <span className="text-xs font-medium">{post.profiles?.name}</span>
                     </div>
                     <p className="text-xs text-white/70 line-clamp-2">{post.caption}</p>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
 
           <div className="flex justify-center mt-6 md:hidden">
-            <a href="/feed">
+            <Link to="/feed">
               <button className="border border-white/15 text-white/60 px-6 py-3 rounded-full text-sm">
                 View all posts <ArrowRight size={14} className="inline ml-1" />
               </button>
-            </a>
+            </Link>
           </div>
         </section>
       )}
@@ -206,9 +208,9 @@ export default function Landing() {
             <p className="text-xs text-orange-400 uppercase tracking-widest mb-2">The Talent</p>
             <h2 className="playfair text-3xl md:text-5xl font-bold">Meet the<br /><span className="italic">creatives</span></h2>
           </div>
-          <a href="/discover" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
+          <Link to="/discover" className="hidden md:flex items-center gap-2 text-sm text-white/40 hover:text-white transition">
             See all <ArrowRight size={16} />
-          </a>
+          </Link>
         </div>
 
         {/* Category filter */}
@@ -235,11 +237,11 @@ export default function Landing() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {filteredProfiles.map((p) => (
-              <a href={`/profile/${p.username}`} key={p.id}>
+              <Link to={`/profile/${p.username}`} key={p.id}>
                 <div className="card-hover bg-white/[0.03] border border-white/8 rounded-xl md:rounded-2xl p-4 md:p-5 flex flex-col items-center text-center cursor-pointer">
                   <div className="relative mb-3">
                     <img
-                      src={p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`}
+                      src={p.avatar_url}
                       alt={p.name}
                       className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border border-white/10"
                     />
@@ -253,17 +255,17 @@ export default function Landing() {
                     </p>
                   )}
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         )}
 
         <div className="flex justify-center mt-8 md:hidden">
-          <a href="/discover">
+          <Link to="/discover">
             <button className="border border-white/15 text-white/60 px-6 py-3 rounded-full text-sm">
               See all creatives <ArrowRight size={14} className="inline ml-1" />
             </button>
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -279,14 +281,14 @@ export default function Landing() {
           <p className="text-white/40 text-base md:text-lg max-w-md mx-auto mb-8 md:mb-10">
             Join thousands of Kenyan creatives already building their brand on CreativesConnect.
           </p>
-          <a href="/auth">
+          <Link to="/auth">
             <button className="bg-orange-400 hover:bg-orange-500 text-black font-bold px-8 md:px-10 py-4 md:py-5 rounded-full transition text-base md:text-lg flex items-center gap-3 mx-auto">
               Create your profile <ArrowRight size={20} />
             </button>
-          </a>
+          </Link>
         </div>
       </section>
-
+      <FeedbackForm />
       <Footer />
     </div>
   )
