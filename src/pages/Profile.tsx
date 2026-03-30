@@ -160,7 +160,7 @@ export default function Profile() {
       <div
         className="relative h-56 w-full"
         style={{
-          backgroundImage: 'radial-gradient(circle, #2a2a2a 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, #e45e16 1px, transparent 1px)',
           backgroundSize: '24px 24px',
           backgroundColor: '#111',
         }}

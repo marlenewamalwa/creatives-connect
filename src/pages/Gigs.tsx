@@ -152,7 +152,6 @@ function ApplyModal({ gig, onClose, userId }: { gig: Gig; onClose: () => void; u
         </div>
         {success ? (
           <div className="text-center py-8">
-            <p className="text-3xl mb-3">🎉</p>
             <p className="font-bold text-lg">Application sent!</p>
             <p className="text-white/40 text-sm mt-2">Good luck with <span className="text-orange-400">{gig.title}</span></p>
             <button onClick={onClose} className="mt-6 bg-orange-400 hover:bg-orange-500 text-black font-bold px-6 py-3 rounded-xl transition">Done</button>
